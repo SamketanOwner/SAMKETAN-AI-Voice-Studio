@@ -7,7 +7,6 @@ import numpy as np
 from pydub import AudioSegment
 from kokoro_onnx import Kokoro
 
-# --- 1. THE RECOVERY ENGINE (FORCING THE 374MB DOWNLOAD) ---
 MODEL_FILE = "kokoro-v0_19.onnx"
 VOICE_FILE = "voices-v1.0.bin"
 # This is a direct link to the raw binary file
