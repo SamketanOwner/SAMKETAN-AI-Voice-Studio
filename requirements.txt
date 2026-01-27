@@ -2,3 +2,4 @@ streamlit
 pydub
 requests
 elevenlabs
+Pillow
