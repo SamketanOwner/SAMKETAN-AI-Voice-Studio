@@ -7,29 +7,29 @@ import numpy as np
 from pydub import AudioSegment
 from kokoro_onnx import Kokoro
 
-# --- THE BULLETPROOF DOWNLOAD FIX ---
+# --- 1. THE RECOVERY ENGINE (FORCING THE 374MB DOWNLOAD) ---
 MODEL_FILE = "kokoro-v0_19.onnx"
 VOICE_FILE = "voices-v1.0.bin"
-# Using the special 'media' link which often bypasses LFS pointer issues
+# This is a direct link to the raw binary file
 MODEL_URL = "https://media.githubusercontent.com/media/SamketanOwner/SAMKETAN-AI-Voice-Studio/main/kokoro-v0_19.onnx"
 
-def download_model():
-    if not os.path.exists(MODEL_FILE) or os.path.getsize(MODEL_FILE) < 1000000: # Less than 1MB means it's a pointer
-        with st.spinner("Downloading High-Quality AI Brain (374MB). This may take 3-5 minutes..."):
-            # Method 1: Direct media download
+def ensure_models_exist():
+    # If file is missing or is just a tiny LFS pointer (< 1MB)
+    if not os.path.exists(MODEL_FILE) or os.path.getsize(MODEL_FILE) < 1000000:
+        with st.spinner("Downloading High-Quality AI Brain (374MB)... This only happens once."):
+            # Force download using curl
             subprocess.run(["curl", "-L", MODEL_URL, "-o", MODEL_FILE])
             
-            # Re-check: If still small, try Method 2: Git LFS Force
+            # If curl fails, try the git lfs pull command
             if os.path.getsize(MODEL_FILE) < 1000000:
                 subprocess.run(["git", "lfs", "pull"])
         st.rerun()
 
-download_model()
+ensure_models_exist()
 
-# --- 1. SETTINGS & BRANDING ---
-# (Rest of your code follows below...)
-# --- 1. SETTINGS & BRANDING ---
+# --- 2. SETTINGS & BRANDING ---
 st.set_page_config(page_title="SAMKETAN AI-Voice-Studio", layout="wide")
+# ... (rest of your sidebar and title code)
 
 # Paths to your high-quality brain files (uploaded via LFS)
 MODEL_FILE = "kokoro-v0_19.onnx"
