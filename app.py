@@ -7,13 +7,13 @@ import numpy as np
 from pydub import AudioSegment
 from kokoro_onnx import Kokoro
 
-# --- 1. SETTINGS & PATHS (DEFINED ONCE) ---
+# --- 1. SETTINGS & PATHS (STABLE LINKS) ---
 MODEL_FILE = "kokoro-v0_19.onnx"
-VOICE_FILE = "voices-v1.0.bin"
+VOICE_FILE = "voices.bin" # The library specifically looks for this name
 
-# These links bypass GitHub LFS and pull the raw binary data directly
-MODEL_URL = "https://huggingface.co/hexgrad/Kokoro-82M/resolve/main/kokoro-v0_19.onnx"
-VOICE_URL = "https://huggingface.co/hexgrad/Kokoro-82M/resolve/main/voices-v1.0.bin"
+# Using the official stable release links from the developer
+MODEL_URL = "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files/kokoro-v0_19.onnx"
+VOICE_URL = "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files/voices.bin"
 
 def download_file(url, path):
     """Downloads a file in binary chunks to prevent UTF-8 corruption."""
@@ -25,15 +25,14 @@ def download_file(url, path):
                     f.write(chunk)
 
 def ensure_models_exist():
-    """Checks if the files are real binary files or tiny LFS pointers."""
-    # If file doesn't exist or is smaller than 1MB (a pointer), download it
+    """Checks if the files are real binary files and not 404/pointers."""
     if not os.path.exists(MODEL_FILE) or os.path.getsize(MODEL_FILE) < 1000000:
-        with st.spinner("🚀 Samketan AI is fetching high-quality voices... (374MB). This takes 3-5 minutes."):
+        with st.spinner("🚀 Fetching High-Quality AI Brain (374MB)... Please wait 3-5 mins."):
             try:
                 download_file(MODEL_URL, MODEL_FILE)
                 download_file(VOICE_URL, VOICE_FILE)
             except Exception as e:
-                st.error(f"Download Failed: {e}")
+                st.error(f"Download Failed: {e}. Please check your internet connection on the server.")
                 return
         st.rerun()
 
@@ -45,7 +44,6 @@ st.set_page_config(page_title="SAMKETAN AI-Voice-Studio", layout="wide")
 
 st.sidebar.title("SAMKETAN AI")
 st.sidebar.info(f"Proprietor: Sanjay Kumar\n📍 Kalyana Karnataka Region")
-st.sidebar.markdown("---")
 st.sidebar.write("Project: AI development for Bhuvi")
 
 st.title("🎙️ SAMKETAN AI-Voice-Studio")
@@ -56,29 +54,27 @@ tab1, tab2, tab3 = st.tabs(["📂 Voice Library", "✍️ Text-to-Voice", "🎼 
 
 with tab1:
     st.header("Human Voice Selection")
-    # Voice choices based on Kokoro standard models
+    # Voice choices 
     voice_choice = st.selectbox("Select Voice Personality", ["af_heart", "am_michael", "af_sky", "bf_isabella"])
     st.success(f"Selected Voice: {voice_choice}")
-    st.info("Tip: 'am_michael' is excellent for warehouse announcements.")
 
 with tab2:
     st.header("Generate Speech")
-    script = st.text_area("What should the voice say?", height=150, placeholder="Enter your business script here...")
+    script = st.text_area("What should the voice say?", height=150, placeholder="Enter your business script...")
     
     if st.button("Generate High-Quality Voice"):
         if script:
             with st.spinner("Synthesizing human speech..."):
                 try:
-                    # Pass the file paths to the engine
+                    # Initialize the engine with the stable files
                     kokoro = Kokoro(MODEL_FILE, VOICE_FILE)
                     samples, sample_rate = kokoro.create(script, voice=voice_choice, speed=1.0)
                     
-                    # Convert samples to WAV bytes
                     out_buffer = io.BytesIO()
                     sf.write(out_buffer, samples, sample_rate, format='WAV')
                     st.session_state['gen_audio'] = out_buffer.getvalue()
                     
-                    st.success("Human speech generated successfully!")
+                    st.success("Human speech generated!")
                     st.audio(st.session_state['gen_audio'])
                 except Exception as e:
                     st.error(f"Detailed Engine Error: {e}")
@@ -94,29 +90,20 @@ with tab3:
         if 'gen_audio' in st.session_state and bg_music:
             with st.spinner("Mixing studio quality audio..."):
                 try:
-                    # Load synthesized voice
                     v_audio = AudioSegment.from_file(io.BytesIO(st.session_state['gen_audio']), format="wav")
-                    
-                    # Load background music
                     m_audio = AudioSegment.from_file(bg_music)
-                    
-                    # Reduce music volume so voice is clear
                     m_audio = m_audio - music_reduction
-                    
-                    # Mix voice over music
                     final_mix = m_audio.overlay(v_audio)
                     
-                    # Export final result
                     final_out = io.BytesIO()
                     final_mix.export(final_out, format="mp3")
                     
                     st.audio(final_out)
                     st.download_button("Download Mastered Mix", final_out, "samketan_master.mp3")
-                    st.success("Your studio-quality ad is ready!")
                 except Exception as e:
                     st.error(f"Mixing Error: {e}")
         else:
-            st.warning("Please generate the voice in Tab 2 and upload background music here first.")
+            st.warning("Please generate the voice in Tab 2 first.")
 
 st.markdown("---")
 st.caption("© 2026 SAMKETAN AI | Proprietary Business Solution by Sanjay Kumar")
