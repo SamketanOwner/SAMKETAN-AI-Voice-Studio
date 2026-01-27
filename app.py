@@ -1,99 +1,80 @@
 import streamlit as st
 import os
 from pydub import AudioSegment
-from elevenlabs.client import ElevenLabs
+from gtts import gTTS
 from io import BytesIO
 from PIL import Image
 
-# --- 1. SETTINGS & BRANDING (MUST BE FIRST) ---
+# --- 1. SETTINGS & BRANDING ---
 st.set_page_config(page_title="SAMKETAN AI-Voice-Studio", layout="wide")
 
-# Sidebar Branding Logic
+# Sidebar Logo Logic
 if os.path.exists("SAMKETAN_LOGO.png"):
     st.sidebar.image("SAMKETAN_LOGO.png", use_container_width=True)
     st.sidebar.markdown("---")
-else:
-    st.sidebar.warning("Logo 'SAMKETAN_LOGO.png' not found. Please upload it to GitHub.")
 
 st.sidebar.title("SAMKETAN AI")
 st.sidebar.info("Proprietor: Sanjay Kumar")
 st.sidebar.write("📍 Kalyana Karnataka Region")
-st.sidebar.write("📧 Contact for Business Inquiries")
 
-# Main Page Header
+# Main Header
 st.title("🎙️ SAMKETAN AI-Voice-Studio")
-st.subheader("Professional Voice Cloning & Studio Mixing")
+st.subheader("Free Business Voice Generator & Mixer")
 
-# --- 2. AUTHENTICATION ---
-API_KEY = st.secrets.get("ELEVENLABS_API_KEY", "")
-client = ElevenLabs(api_key=API_KEY)
+# --- 2. THE 3-TAB INTERFACE ---
+tab1, tab2, tab3 = st.tabs(["📂 Voice Library", "✍️ Text-to-Voice", "🎼 Studio Master"])
 
-# --- 3. THE 3-TAB INTERFACE ---
-tab1, tab2, tab3 = st.tabs(["📂 Voice Sample", "✍️ Text-to-Voice", "🎼 Studio Master"])
-
-# TAB 1: Uploading the source voice
 with tab1:
-    st.header("Upload Voice Sample")
-    st.info("Upload 30-60 seconds of clear audio to clone the voice.")
-    # This line must be indented with 4 spaces to stay inside 'with tab1:'
-    up_voice = st.file_uploader("Target Voice (WAV/MP3/M4A)", type=['wav', 'mp3', 'm4a'], key="voice_upload")
-    if up_voice:
-        st.success("Voice sample loaded successfully!")
-# TAB 2: Text input and Generation
-# TAB 2: Text input and Generation
-# TAB 2: Text input and Generation (FREE VERSION)
+    st.header("Voice Settings")
+    st.info("Using Google Free Voice Engine. No API Key required!")
+    language = st.selectbox("Select Language", ["en", "hi", "kn"], format_func=lambda x: {"en":"English", "hi":"Hindi", "kn":"Kannada"}[x])
+
 with tab2:
-    st.header("Generate AI Speech")
-    script = st.text_area("What should the voice say?", height=150, placeholder="Enter your business script here...")
+    st.header("Generate Speech")
+    script = st.text_area("What should the voice say?", height=150, placeholder="Enter your business script...")
     
     if st.button("Generate Voice"):
-        if not API_KEY:
-            st.error("API Key missing. Please add it to Streamlit Secrets.")
-        elif script: # We don't need 'up_voice' for pre-made voices
-            with st.spinner("AI is speaking..."):
+        if script:
+            with st.spinner("Generating audio..."):
                 try:
-                    # Using a pre-made voice ID (this is 'Adam')
-                    audio_gen = client.text_to_speech.convert(
-                        text=script, 
-                        voice_id="pNInz6obpgDQGcFmaJgB", 
-                        model_id="eleven_turbo_v2_5"
-                    )
+                    # Google TTS Logic
+                    tts = gTTS(text=script, lang=language)
+                    audio_fp = BytesIO()
+                    tts.write_to_fp(audio_fp)
                     
-                    st.session_state['gen_audio'] = b"".join(audio_gen)
-                    st.success("Speech generated! Go to Tab 3 to add music.")
+                    st.session_state['gen_audio'] = audio_fp.getvalue()
+                    st.success("Speech generated! Go to Tab 3 to mix with music.")
                     st.audio(st.session_state['gen_audio'])
                 except Exception as e:
-                    st.error(f"AI Error: {e}")
+                    st.error(f"Error: {e}")
         else:
-            st.warning("Please enter text here.")
+            st.warning("Please enter some text.")
 
-# TAB 3: Mixing and Ducking
 with tab3:
     st.header("Background Music & Mixing")
-    bg_music = st.file_uploader("Upload Music", type=['wav', 'mp3'], key="music_upload")
+    bg_music = st.file_uploader("Upload Music (MP3/WAV)", type=['wav', 'mp3'])
     music_reduction = st.slider("Music Volume Reduction (dB)", 0, 20, 12)
 
     if st.button("Master Final Output"):
         if 'gen_audio' in st.session_state and bg_music:
-            with st.spinner("Mastering audio for clarity..."):
+            with st.spinner("Mixing studio quality audio..."):
                 # Load synthesized voice
-                v_audio = AudioSegment.from_file(BytesIO(st.session_state['gen_audio']))
+                v_audio = AudioSegment.from_file(BytesIO(st.session_state['gen_audio']), format="mp3")
                 # Load music
                 m_audio = AudioSegment.from_file(bg_music)
                 
-                # Apply "Ducking" (Lower music volume)
+                # Apply Ducking
                 m_audio = m_audio - music_reduction
                 
-                # Mix them
+                # Mix
                 final_mix = m_audio.overlay(v_audio)
                 
-                # Export and Display
                 out_buffer = BytesIO()
                 final_mix.export(out_buffer, format="mp3")
                 st.audio(out_buffer)
                 st.download_button("Download Mastered Mix", out_buffer, "samketan_master.mp3")
         else:
-            st.warning("Ensure you have generated voice in Tab 2 and uploaded music here.")
+            st.warning("Generate voice in Tab 2 and upload music here first.")
 
 st.markdown("---")
 st.caption("© 2026 SAMKETAN AI | Proprietary Business Solution by Sanjay Kumar")
