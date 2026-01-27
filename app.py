@@ -1,22 +1,22 @@
+import streamlit as st  # THIS MUST BE LINE 1
 import os
 import subprocess
-
-# TRIGGER: Force the server to download the large AI files if they are missing
-if not os.path.exists(".lfs_done"):
-    with st.spinner("Downloading high-quality AI models... please wait (3-5 mins)"):
-        subprocess.run(["sh", "setup.sh"])
-        # Create a tiny file so it only downloads ONCE
-        with open(".lfs_done", "w") as f:
-            f.write("done")
-    st.rerun()
-import streamlit as st
-import os
-from pydub import AudioSegment
-from kokoro_onnx import Kokoro
 import io
 import soundfile as sf
 import numpy as np
+from pydub import AudioSegment
+from kokoro_onnx import Kokoro
 
+# NOW the "TRIGGER" code can run safely
+if not os.path.exists(".lfs_done"):
+    with st.spinner("Samketan AI is fetching high-quality voices... please wait (3-5 mins)"):
+        subprocess.run(["sh", "setup.sh"])
+        with open(".lfs_done", "w") as f:
+            f.write("done")
+    st.rerun()
+
+# --- 1. SETTINGS & BRANDING ---
+# (Rest of your code follows below...)
 # --- 1. SETTINGS & BRANDING ---
 st.set_page_config(page_title="SAMKETAN AI-Voice-Studio", layout="wide")
 
