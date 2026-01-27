@@ -55,12 +55,11 @@ with tab2:
                         name="TempVoice",
                         files=[up_voice]
                     )
-                    audio_gen = client.text_to_speech.convert(
-                        text=script, 
-                        voice_id=voice.voice_id,
-                        model_id="eleven_turbo_v2_5"
-                    )
-                    
+                   audio_gen = client.text_to_speech.convert(
+    text=script, 
+    voice_id=voice.voice_id,
+    model_id="eleven_turbo_v2_5" # 3x faster than the default model!
+)
                     st.session_state['gen_audio'] = b"".join(audio_gen)
                     st.success("Speech generated successfully!")
                     st.audio(st.session_state['gen_audio'])
