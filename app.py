@@ -35,8 +35,8 @@ tab1, tab2, tab3 = st.tabs(["📂 Voice Sample", "✍️ Text-to-Voice", "🎼 S
 with tab1:
     st.header("Upload Voice Sample")
     st.info("Upload 30-60 seconds of clear audio to clone the voice.")
-    # Change this line in Tab 1
-up_voice = st.file_uploader("Target Voice (WAV/MP3/M4A)", type=['wav', 'mp3', 'm4a'], key="voice_upload")
+    # This line must be indented with 4 spaces to stay inside 'with tab1:'
+    up_voice = st.file_uploader("Target Voice (WAV/MP3/M4A)", type=['wav', 'mp3', 'm4a'], key="voice_upload")
     if up_voice:
         st.success("Voice sample loaded successfully!")
 # TAB 2: Text input and Generation
