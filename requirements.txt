@@ -1,5 +1,4 @@
 streamlit
 pydub
-requests
-elevenlabs
+gTTS
 Pillow
