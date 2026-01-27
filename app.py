@@ -40,6 +40,7 @@ with tab1:
     if up_voice:
         st.success("Voice sample loaded successfully!")
 # TAB 2: Text input and Generation
+# TAB 2: Text input and Generation
 with tab2:
     st.header("Generate AI Speech")
     script = st.text_area("What should the voice say?", height=150, placeholder="Enter your business script here...")
@@ -50,21 +51,23 @@ with tab2:
         elif up_voice and script:
             with st.spinner("AI is cloning and speaking..."):
                 try:
-                    # These lines are indented because they are INSIDE the 'try'
+                    # CLONING LOGIC
                     voice = client.voices.ivc.create(
                         name="TempVoice",
                         files=[up_voice]
                     )
-                   audio_gen = client.text_to_speech.convert(
-    text=script, 
-    voice_id=voice.voice_id,
-    model_id="eleven_turbo_v2_5" # 3x faster than the default model!
-)
+                    # GENERATION LOGIC
+                    audio_gen = client.text_to_speech.convert(
+                        text=script, 
+                        voice_id=voice.voice_id,
+                        model_id="eleven_turbo_v2_5"
+                    )
+                    
+                    # Store result
                     st.session_state['gen_audio'] = b"".join(audio_gen)
-                    st.success("Speech generated successfully!")
+                    st.success("Speech generated! Go to Tab 3 to add music.")
                     st.audio(st.session_state['gen_audio'])
                 except Exception as e:
-                    # The 'except' is lined up with 'try'
                     st.error(f"AI Generation Error: {e}")
         else:
             st.warning("Please upload a voice in Tab 1 and enter text here.")
