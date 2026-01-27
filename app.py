@@ -1,4 +1,4 @@
-import streamlit as st  # THIS MUST BE LINE 1
+import streamlit as st
 import os
 import subprocess
 import io
@@ -7,12 +7,16 @@ import numpy as np
 from pydub import AudioSegment
 from kokoro_onnx import Kokoro
 
-# NOW the "TRIGGER" code can run safely
-if not os.path.exists(".lfs_done"):
-    with st.spinner("Samketan AI is fetching high-quality voices... please wait (3-5 mins)"):
-        subprocess.run(["sh", "setup.sh"])
-        with open(".lfs_done", "w") as f:
-            f.write("done")
+# --- DIRECT DOWNLOAD FIX ---
+MODEL_URL = "https://github.com/SamketanOwner/SAMKETAN-AI-Voice-Studio/raw/main/kokoro-v0_19.onnx"
+MODEL_FILE = "kokoro-v0_19.onnx"
+VOICE_FILE = "voices-v1.0.bin"
+
+# Check if the model is a tiny LFS pointer (usually < 1KB)
+if not os.path.exists(MODEL_FILE) or os.path.getsize(MODEL_FILE) < 10000:
+    with st.spinner("Downloading high-quality AI engine (374MB)... This takes 2-4 minutes."):
+        # This command forces a direct download of the actual binary file
+        subprocess.run(["curl", "-L", MODEL_URL, "-o", MODEL_FILE])
     st.rerun()
 
 # --- 1. SETTINGS & BRANDING ---
