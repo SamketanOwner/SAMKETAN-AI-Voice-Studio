@@ -7,17 +7,24 @@ import numpy as np
 from pydub import AudioSegment
 from kokoro_onnx import Kokoro
 
-# --- DIRECT DOWNLOAD FIX ---
-MODEL_URL = "https://github.com/SamketanOwner/SAMKETAN-AI-Voice-Studio/raw/main/kokoro-v0_19.onnx"
+# --- THE BULLETPROOF DOWNLOAD FIX ---
 MODEL_FILE = "kokoro-v0_19.onnx"
 VOICE_FILE = "voices-v1.0.bin"
+# Using the special 'media' link which often bypasses LFS pointer issues
+MODEL_URL = "https://media.githubusercontent.com/media/SamketanOwner/SAMKETAN-AI-Voice-Studio/main/kokoro-v0_19.onnx"
 
-# Check if the model is a tiny LFS pointer (usually < 1KB)
-if not os.path.exists(MODEL_FILE) or os.path.getsize(MODEL_FILE) < 10000:
-    with st.spinner("Downloading high-quality AI engine (374MB)... This takes 2-4 minutes."):
-        # This command forces a direct download of the actual binary file
-        subprocess.run(["curl", "-L", MODEL_URL, "-o", MODEL_FILE])
-    st.rerun()
+def download_model():
+    if not os.path.exists(MODEL_FILE) or os.path.getsize(MODEL_FILE) < 1000000: # Less than 1MB means it's a pointer
+        with st.spinner("Downloading High-Quality AI Brain (374MB). This may take 3-5 minutes..."):
+            # Method 1: Direct media download
+            subprocess.run(["curl", "-L", MODEL_URL, "-o", MODEL_FILE])
+            
+            # Re-check: If still small, try Method 2: Git LFS Force
+            if os.path.getsize(MODEL_FILE) < 1000000:
+                subprocess.run(["git", "lfs", "pull"])
+        st.rerun()
+
+download_model()
 
 # --- 1. SETTINGS & BRANDING ---
 # (Rest of your code follows below...)
