@@ -41,6 +41,7 @@ with tab1:
         st.success("Voice sample loaded successfully!")
 # TAB 2: Text input and Generation
 # TAB 2: Text input and Generation
+# TAB 2: Text input and Generation (FREE VERSION)
 with tab2:
     st.header("Generate AI Speech")
     script = st.text_area("What should the voice say?", height=150, placeholder="Enter your business script here...")
@@ -48,29 +49,23 @@ with tab2:
     if st.button("Generate Voice"):
         if not API_KEY:
             st.error("API Key missing. Please add it to Streamlit Secrets.")
-        elif up_voice and script:
-            with st.spinner("AI is cloning and speaking..."):
+        elif script: # We don't need 'up_voice' for pre-made voices
+            with st.spinner("AI is speaking..."):
                 try:
-                    # CLONING LOGIC
-                    voice = client.voices.ivc.create(
-                        name="TempVoice",
-                        files=[up_voice]
-                    )
-                    # GENERATION LOGIC
+                    # Using a pre-made voice ID (this is 'Adam')
                     audio_gen = client.text_to_speech.convert(
                         text=script, 
-                        voice_id=voice.voice_id,
+                        voice_id="pNInz6obpgDQGcFmaJgB", 
                         model_id="eleven_turbo_v2_5"
                     )
                     
-                    # Store result
                     st.session_state['gen_audio'] = b"".join(audio_gen)
                     st.success("Speech generated! Go to Tab 3 to add music.")
                     st.audio(st.session_state['gen_audio'])
                 except Exception as e:
-                    st.error(f"AI Generation Error: {e}")
+                    st.error(f"AI Error: {e}")
         else:
-            st.warning("Please upload a voice in Tab 1 and enter text here.")
+            st.warning("Please enter text here.")
 
 # TAB 3: Mixing and Ducking
 with tab3:
