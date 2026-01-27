@@ -39,7 +39,6 @@ with tab1:
 up_voice = st.file_uploader("Target Voice (WAV/MP3/M4A)", type=['wav', 'mp3', 'm4a'], key="voice_upload")
     if up_voice:
         st.success("Voice sample loaded successfully!")
-
 # TAB 2: Text input and Generation
 with tab2:
     st.header("Generate AI Speech")
