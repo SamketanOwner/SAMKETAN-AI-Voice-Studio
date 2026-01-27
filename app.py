@@ -50,20 +50,28 @@ with tab2:
         elif up_voice and script:
             with st.spinner("AI is cloning and speaking..."):
                 try:
-                    # CLONING LOGIC
-                    voice = client.clone(
-                        name="TempVoice",
-                        files=[up_voice]
-                    )
-                    # GENERATION LOGIC
-                    audio_gen = client.generate(text=script, voice=voice.voice_id)
-                    
-                    # Store in session so Tab 3 can see it
-                    st.session_state['gen_audio'] = b"".join(audio_gen)
-                    st.success("Speech generated! Go to Tab 3 to add music.")
-                    st.audio(st.session_state['gen_audio'])
-                except Exception as e:
-                    st.error(f"AI Generation Error: {e}")
+                   # --- UPDATED CLONING LOGIC FOR 2026 ---
+try:
+    # We now use voices.ivc.create instead of just clone
+    voice = client.voices.ivc.create(
+        name="TempVoice",
+        files=[up_voice]
+    )
+    
+    # Generate the speech using the new voice ID
+    audio_gen = client.text_to_speech.convert(
+        text=script, 
+        voice_id=voice.voice_id,
+        model_id="eleven_turbo_v2_5" # Use Turbo for faster results!
+    )
+    
+    # Store in session so Tab 3 can see it
+    st.session_state['gen_audio'] = b"".join(audio_gen)
+    st.success("Speech generated successfully!")
+    st.audio(st.session_state['gen_audio'])
+    
+except Exception as e:
+    st.error(f"AI Generation Error: {e}")
         else:
             st.warning("Please upload a voice in Tab 1 and enter text here.")
 
