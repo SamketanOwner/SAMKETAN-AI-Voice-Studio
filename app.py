@@ -33,35 +33,37 @@ with tab1:
 
 with tab2:
     st.header("Generate Speech")
-    script = st.text_area("What should the voice say?", height=150, placeholder="Enter your business script for Bhoodevi Warehouse...")
+    script = st.text_area("What should the voice say?", height=150, placeholder="Enter your business script...")
     
     if st.button("Generate High-Quality Voice"):
         if script:
-            # Check if AI brain files are present
+            # Check if files exist
             if os.path.exists(MODEL_FILE) and os.path.exists(VOICE_FILE):
-                with st.spinner("Samketan AI is synthesizing human speech..."):
-                    try:
-                        # Initialize Engine
-                        kokoro = Kokoro(MODEL_FILE, VOICE_FILE)
-                        
-                        # Create audio samples
-                        samples, sample_rate = kokoro.create(script, voice=voice_choice, speed=1.0)
-                        
-                        # FIX: Use io.BytesIO to handle as binary data (prevents UTF-8 error)
-                        out_buffer = io.BytesIO()
-                        sf.write(out_buffer, samples, sample_rate, format='WAV')
-                        
-                        # Store in session state for Tab 3
-                        st.session_state['gen_audio'] = out_buffer.getvalue()
-                        
-                        st.success("Human speech generated! Move to Tab 3 for music.")
-                        st.audio(st.session_state['gen_audio'])
-                    except Exception as e:
-                        st.error(f"Error generating audio: {e}")
+                model_size = os.path.getsize(MODEL_FILE)
+                
+                # SENSOR: If file is too small, it's an LFS pointer (the cause of the UTF-8 error)
+                if model_size < 10000: 
+                    st.error(f"LFS Error: The model file is only {model_size} bytes. GitHub is sending a text 'pointer' instead of the 374MB AI brain. Please add a 'setup.sh' file to your repo with 'git lfs pull'.")
+                else:
+                    with st.spinner("Samketan AI is synthesizing human speech..."):
+                        try:
+                            # Initialize Engine
+                            kokoro = Kokoro(MODEL_FILE, VOICE_FILE)
+                            samples, sample_rate = kokoro.create(script, voice=voice_choice, speed=1.0)
+                            
+                            # Handle binary data to avoid the 'utf-8' error
+                            out_buffer = io.BytesIO()
+                            sf.write(out_buffer, samples, sample_rate, format='WAV')
+                            
+                            st.session_state['gen_audio'] = out_buffer.getvalue()
+                            st.success("Human speech generated!")
+                            st.audio(st.session_state['gen_audio'])
+                        except Exception as e:
+                            st.error(f"Detailed Engine Error: {e}")
             else:
-                st.error("AI Brain files not found. Ensure .onnx and .bin files are in the repository.")
+                st.error("AI Brain files not found in the directory.")
         else:
-            st.warning("Please enter some text first.")
+            st.warning("Please enter text first.")
 
 with tab3:
     st.header("Background Music & Mixing")
