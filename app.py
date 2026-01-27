@@ -45,24 +45,32 @@ with tab2:
     
     if st.button("Generate High-Quality Voice"):
         if script:
-            with st.spinner("Samketan AI is synthesizing human speech..."):
-                try:
-                    # THE FINAL FIX: Read model as raw binary data to bypass UTF-8 errors
-                    with open(MODEL_FILE, "rb") as f_model:
-                        model_bytes = f_model.read()
-                        kokoro = Kokoro(model_bytes, VOICE_FILE)
-                        samples, sample_rate = kokoro.create(script, voice=voice_choice, speed=1.0)
-                    
-                    out_buffer = io.BytesIO()
-                    sf.write(out_buffer, samples, sample_rate, format='WAV')
-                    st.session_state['gen_audio'] = out_buffer.getvalue()
-                    
-                    st.success("Human speech generated!")
-                    st.audio(st.session_state['gen_audio'])
-                except Exception as e:
-                    st.error(f"Detailed Engine Error: {e}")
-        else:
-            st.warning("Please enter text first.")
+            if os.path.exists(MODEL_FILE) and os.path.exists(VOICE_FILE):
+                # SENSOR: Check if the file is a fake 'pointer'
+                with open(MODEL_FILE, 'rb') as f:
+                    header = f.read(100)
+                
+                if b"version https://git-lfs" in header:
+                    st.error("Detected a 'Pointer' file instead of the AI Brain. Attempting to force download...")
+                    subprocess.run(["curl", "-L", MODEL_URL, "-o", MODEL_FILE])
+                    st.rerun()
+                else:
+                    with st.spinner("Samketan AI is synthesizing human speech..."):
+                        try:
+                            # PASSING THE FILENAME (STRING) AS REQUIRED
+                            kokoro = Kokoro(MODEL_FILE, VOICE_FILE)
+                            samples, sample_rate = kokoro.create(script, voice=voice_choice, speed=1.0)
+                            
+                            out_buffer = io.BytesIO()
+                            sf.write(out_buffer, samples, sample_rate, format='WAV')
+                            st.session_state['gen_audio'] = out_buffer.getvalue()
+                            
+                            st.success("Human speech generated!")
+                            st.audio(st.session_state['gen_audio'])
+                        except Exception as e:
+                            st.error(f"Detailed Engine Error: {e}")
+            else:
+                st.error("AI Brain files not found.")
 
 with tab3:
     st.header("Background Music & Mixing")
