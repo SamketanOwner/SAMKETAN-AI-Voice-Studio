@@ -68,22 +68,28 @@ with tab3:
     if st.button("Master Final Output"):
         if 'gen_audio' in st.session_state and bg_music:
             with st.spinner("Mixing studio quality audio..."):
-                # Load voice from memory
-                v_audio = AudioSegment.from_file(io.BytesIO(st.session_state['gen_audio']), format="wav")
-                
-                # Load background music
-                m_audio = AudioSegment.from_file(bg_music)
-                
-                # Apply volume reduction to music so voice is clear
-                m_audio = m_audio - music_reduction
-                
-                # Overlay voice on music
-                final_mix = m_audio.overlay(v_audio)
-                
-                final_out = io.BytesIO()
-                final_mix.export(final_out, format="mp3")
-                st.audio(final_out)
-                st.download_button("Download Mastered Mix", final_out, "samketan_master.mp3")
+                try:
+                    # IMPORTANT: We tell Pydub this is definitely a WAV file from memory
+                    v_audio = AudioSegment.from_file(io.BytesIO(st.session_state['gen_audio']), format="wav")
+                    
+                    # Load background music
+                    m_audio = AudioSegment.from_file(bg_music)
+                    
+                    # Apply volume reduction
+                    m_audio = m_audio - music_reduction
+                    
+                    # Mix
+                    final_mix = m_audio.overlay(v_audio)
+                    
+                    # Export to MP3
+                    final_out = io.BytesIO()
+                    final_mix.export(final_out, format="mp3")
+                    
+                    st.audio(final_out)
+                    st.download_button("Download Mastered Mix", final_out, "samketan_master.mp3")
+                except Exception as e:
+                    st.error(f"Mixing Error: {e}")
+                    st.write("Tip: Try generating the voice again in Tab 2 before mixing.")
         else:
             st.warning("Generate voice in Tab 2 and upload music here first.")
 
