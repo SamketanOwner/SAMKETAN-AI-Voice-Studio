@@ -59,31 +59,27 @@ with tab2:
     
     if st.button("Generate High-Quality Voice"):
         if script:
-            # Check if files exist
             if os.path.exists(MODEL_FILE) and os.path.exists(VOICE_FILE):
-                model_size = os.path.getsize(MODEL_FILE)
-                
-                # SENSOR: If file is too small, it's an LFS pointer (the cause of the UTF-8 error)
-                if model_size < 10000: 
-                    st.error(f"LFS Error: The model file is only {model_size} bytes. GitHub is sending a text 'pointer' instead of the 374MB AI brain. Please add a 'setup.sh' file to your repo with 'git lfs pull'.")
-                else:
-                    with st.spinner("Samketan AI is synthesizing human speech..."):
-                        try:
-                            # Initialize Engine
-                            kokoro = Kokoro(MODEL_FILE, VOICE_FILE)
+                with st.spinner("Samketan AI is synthesizing human speech..."):
+                    try:
+                        # NEW FIX: Open both files in "rb" (Read Binary) mode 
+                        # This prevents the 'utf-8' codec error
+                        with open(MODEL_FILE, "rb") as f_model, open(VOICE_FILE, "rb") as f_voice:
+                            kokoro = Kokoro(f_model, f_voice)
                             samples, sample_rate = kokoro.create(script, voice=voice_choice, speed=1.0)
-                            
-                            # Handle binary data to avoid the 'utf-8' error
-                            out_buffer = io.BytesIO()
-                            sf.write(out_buffer, samples, sample_rate, format='WAV')
-                            
-                            st.session_state['gen_audio'] = out_buffer.getvalue()
-                            st.success("Human speech generated!")
-                            st.audio(st.session_state['gen_audio'])
-                        except Exception as e:
-                            st.error(f"Detailed Engine Error: {e}")
+                        
+                        out_buffer = io.BytesIO()
+                        sf.write(out_buffer, samples, sample_rate, format='WAV')
+                        st.session_state['gen_audio'] = out_buffer.getvalue()
+                        
+                        st.success("Human speech generated!")
+                        st.audio(st.session_state['gen_audio'])
+                    except Exception as e:
+                        # If the file is still an LFS pointer, this will now show 
+                        # a "Format Error" instead of a "UTF-8" error.
+                        st.error(f"Detailed Engine Error: {e}")
             else:
-                st.error("AI Brain files not found in the directory.")
+                st.error("AI Brain files not found.")
         else:
             st.warning("Please enter text first.")
 
