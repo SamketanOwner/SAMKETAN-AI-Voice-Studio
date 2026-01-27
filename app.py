@@ -1,3 +1,14 @@
+import os
+import subprocess
+
+# TRIGGER: Force the server to download the large AI files if they are missing
+if not os.path.exists(".lfs_done"):
+    with st.spinner("Downloading high-quality AI models... please wait (3-5 mins)"):
+        subprocess.run(["sh", "setup.sh"])
+        # Create a tiny file so it only downloads ONCE
+        with open(".lfs_done", "w") as f:
+            f.write("done")
+    st.rerun()
 import streamlit as st
 import os
 from pydub import AudioSegment
