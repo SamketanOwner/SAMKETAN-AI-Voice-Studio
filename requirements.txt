@@ -3,3 +3,4 @@ pydub
 requests
 python-dotenv
 elevenlabs
+audioop-lts
