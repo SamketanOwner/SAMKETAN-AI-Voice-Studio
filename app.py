@@ -35,28 +35,28 @@ with tab2:
     st.header("Generate Speech")
     script = st.text_area("What should the voice say?", height=150, placeholder="Enter your business script for Bhoodevi Warehouse...")
     
-    # --- Inside Tab 2: Generate Speech ---
-if st.button("Generate High-Quality Voice"):
-    if script:
-        with st.spinner("Synthesizing human speech..."):
-            try:
-                kokoro = Kokoro(MODEL_FILE, VOICE_FILE)
-                samples, sample_rate = kokoro.create(script, voice=voice_choice, speed=1.0)
-                
-                # FIX: Create a "Binary" buffer to hold the audio data
-                out_buffer = io.BytesIO() 
-                
-                # Use soundfile to write the raw samples into that buffer as a WAV
-                sf.write(out_buffer, samples, sample_rate, format='WAV')
-                
-                # Save the raw BYTES to the session state (this avoids the UTF-8 error)
-                st.session_state['gen_audio'] = out_buffer.getvalue()
-                
-                st.success("Human speech generated!")
-                st.audio(st.session_state['gen_audio'])
-            except Exception as e:
-                st.error(f"Error generating audio: {e}")
+    # This button MUST be indented (pushed to the right) to stay inside Tab 2
+    if st.button("Generate High-Quality Voice"):
+        if script:
+            # First, check if your 374MB brain files are actually there
+            if os.path.exists(MODEL_FILE) and os.path.exists(VOICE_FILE):
+                with st.spinner("Synthesizing human speech..."):
+                    try:
+                        kokoro = Kokoro(MODEL_FILE, VOICE_FILE)
+                        samples, sample_rate = kokoro.create(script, voice=voice_choice, speed=1.0)
+                        
+                        # Handle as binary data to avoid the 'utf-8' error
+                        out_buffer = io.BytesIO() 
+                        sf.write(out_buffer, samples, sample_rate, format='WAV')
+                        
+                        st.session_state['gen_audio'] = out_buffer.getvalue()
+                        
+                        st.success("Human speech generated!")
+                        st.audio(st.session_state['gen_audio'])
+                    except Exception as e:
+                        st.error(f"Error generating audio: {e}")
             else:
+                # This else now correctly warns you if files are missing
                 st.error("AI Brain files not found. Please ensure the .onnx and .bin files are uploaded.")
         else:
             st.warning("Please enter text first.")
