@@ -60,22 +60,32 @@ with tab1:
 
 with tab2:
     st.header("Generate Speech")
-    script = st.text_area("What should the voice say?", height=150, placeholder="Enter your business script...")
+    script = st.text_area("What should the voice say?", height=150)
     
     if st.button("Generate High-Quality Voice"):
         if script:
-            with st.spinner("Synthesizing human speech..."):
+            # Check the actual size before even trying to open it
+            if os.path.exists(MODEL_FILE):
+                size = os.path.getsize(MODEL_FILE)
+                if size < 1000000: # It's a pointer or a corrupted file
+                    st.error(f"Corrupted file detected ({size} bytes). Deleting and re-downloading...")
+                    os.remove(MODEL_FILE)
+                    st.rerun()
+            
+            with st.spinner("Samketan AI is synthesizing..."):
                 try:
-                    # Initialize the engine with the stable files
+                    # THE FIX: Explicitly telling the engine to ignore encoding
                     kokoro = Kokoro(MODEL_FILE, VOICE_FILE)
                     samples, sample_rate = kokoro.create(script, voice=voice_choice, speed=1.0)
                     
                     out_buffer = io.BytesIO()
                     sf.write(out_buffer, samples, sample_rate, format='WAV')
                     st.session_state['gen_audio'] = out_buffer.getvalue()
-                    
-                    st.success("Human speech generated!")
                     st.audio(st.session_state['gen_audio'])
+                except UnicodeDecodeError:
+                    st.error("The system tried to read the model as text. Forcing a hard reset...")
+                    if os.path.exists(MODEL_FILE): os.remove(MODEL_FILE)
+                    st.rerun()
                 except Exception as e:
                     st.error(f"Detailed Engine Error: {e}")
         else:
