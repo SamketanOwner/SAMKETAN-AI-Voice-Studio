@@ -1,7 +1,6 @@
 streamlit
-kokoro-onnx
-onnxruntime
+TTS
 soundfile
+numpy<2.0
 pydub
 pyloudnorm
-numpy<2.0
