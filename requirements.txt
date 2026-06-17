@@ -3,4 +3,5 @@ kokoro-onnx
 onnxruntime
 soundfile
 pydub
+pyloudnorm
 numpy<2.0
