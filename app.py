@@ -124,8 +124,18 @@ with tab1:
     if sample and consent:
         with st.spinner("🔄 Processing and optimizing your voice profile..."):
             try:
-                # Read the uploaded file
-                audio_segment = AudioSegment.from_file(sample)
+                # CRITICAL FIX: Save uploaded file to disk first
+                # Streaming from Streamlit's file object causes ffmpeg errors
+                file_ext = sample.name.split('.')[-1].lower()
+                temp_file = f"temp_upload.{file_ext}"
+                
+                # Save uploaded file to disk
+                with open(temp_file, "wb") as f:
+                    f.write(sample.getbuffer())
+                
+                # Now read from disk using the saved file
+                audio_segment = AudioSegment.from_file(temp_file)
+                
                 duration_sec = len(audio_segment) / 1000.0
                 st.info(f"Audio duration: {duration_sec:.1f}s")
                 
@@ -163,7 +173,14 @@ with tab1:
                     st.info("Proceed to Tab 2: Generate Voice")
                     
             except Exception as e:
-                st.error(f"❌ Audio Processing Error: {e}\nTry: Upload a standard WAV file with clear voice.")
+                st.error(f"❌ Audio Processing Error: {str(e)[:150]}")
+                st.info("**Quick fix:** Try uploading a different WAV file")
+                # Cleanup temp file if it exists
+                try:
+                    if os.path.exists(temp_file):
+                        os.remove(temp_file)
+                except:
+                    pass
     
     elif sample and not consent:
         st.warning("Please check the consent box before uploading.")
