@@ -1,0 +1,162 @@
+# 🚀 QUICK FIX - Indian English Voice Cloning
+
+## 3-STEP SOLUTION TO FIX ROBOTIC AMERICAN ENGLISH
+
+### Step 1: Get HF_TOKEN (2 min)
+```
+1. Go to: https://huggingface.co/settings/tokens
+2. Create "New token" → select "Read"
+3. Copy token (starts with "hf_")
+```
+
+### Step 2: Add to Streamlit Cloud Secrets (1 min)
+```
+1. Go to your Streamlit Cloud app
+2. Click three dots → Settings
+3. Click "Secrets"
+4. Paste: HF_TOKEN = "hf_YOUR_TOKEN_HERE"
+5. Save (app auto-restarts)
+```
+
+### Step 3: Update Code (3 min)
+
+**Replace your entire app.py** with the improved version that has:
+- ✅ HF_TOKEN authentication
+- ✅ en-IN Indian English option
+- ✅ Better audio preprocessing
+- ✅ Optimized voice parameters
+
+**Update requirements.txt** - add this line:
+```
+huggingface-hub==0.24.0
+```
+
+---
+
+## ⚠️ WHY YOU'RE GETTING AMERICAN ENGLISH NOW
+
+| Problem | Cause | Solution |
+|---------|-------|----------|
+| Robotic sound | Missing HF_TOKEN → old model cache | Add HF_TOKEN to secrets |
+| American accent | "en" language defaults to American | Use en-IN, adjust parameters |
+| Loses your voice | Poor audio conditioning | Record 20-40s of expressive Indian English |
+| Unnatural flow | Default parameters not tuned | Use recommended parameters |
+
+---
+
+## 🎙️ RECORDING CHECKLIST
+
+Your reference audio must be:
+- [ ] 20-40 seconds long
+- [ ] Clear Indian English accent (don't suppress it!)
+- [ ] Varied emotion & intonation (not monotone)
+- [ ] Background noise < 40dB (quiet room)
+- [ ] Good microphone quality
+- [ ] Read naturally (not robotic)
+
+**Sample to read:**
+```
+"Hello, I'm [Name]. I work in [industry]. This innovative 
+solution helps businesses grow. The results are outstanding. 
+I'm excited to share this technology with you today."
+```
+
+---
+
+## 🎯 PARAMETER SETTINGS
+
+### Quick Wins:
+**For Natural Indian English:**
+- Expressiveness: **0.70** (not too loud, not too soft)
+- Repetition Penalty: **5.0** (avoid repeated words)
+- Speaking Rate: **1.0** (normal speed)
+- Voice Consistency: **0.85** (stay close to your voice)
+
+**If still sounds robotic:**
+- Increase Expressiveness to **0.75-0.80**
+- Decrease Voice Consistency to **0.75**
+- Increase Speaking Rate to **1.05**
+
+---
+
+## 🔴 COMMON ERRORS & FIXES
+
+### Error: "HF_TOKEN not found"
+```
+❌ Fix: Add to Streamlit Cloud Secrets, then restart app
+```
+
+### Error: "Audio Processing Error"
+```
+❌ Check: Is voice sample 15-60 seconds? Try WAV format.
+```
+
+### Output: Still American English accent
+```
+❌ Re-record voice sample with Indian English accent intact
+❌ Lower Voice Consistency to 0.75
+❌ Increase Expressiveness to 0.75
+```
+
+### Output: Sounds like robotic TTS
+```
+❌ Increase Expressiveness slider (0.70 → 0.80)
+❌ Lower Repetition Penalty (10 → 5)
+❌ Vary speaking rate (try 0.95-1.05)
+```
+
+---
+
+## FILES TO UPDATE
+
+```
+Your Project/
+├── app.py                          ← REPLACE with improved_app.py
+├── requirements.txt                ← ADD huggingface-hub==0.24.0
+├── .streamlit/
+│   └── secrets.toml (local only)   ← ADD HF_TOKEN = "hf_..."
+└── .gitignore                      ← ADD .streamlit/secrets.toml
+```
+
+---
+
+## ✅ VERIFY SETUP
+
+After changes, check:
+```
+1. HF_TOKEN in Streamlit secrets? ✓
+2. app.py has HF login code? ✓
+3. requirements.txt updated? ✓
+4. App restarted? ✓
+5. Reference audio is Indian English accent? ✓
+```
+
+---
+
+## 📞 STILL NOT WORKING?
+
+Run this test in Python:
+```python
+import os
+os.environ["HF_TOKEN"] = "hf_YOUR_TOKEN"
+from huggingface_hub import login
+login(token="hf_YOUR_TOKEN")
+
+# If no error → HF_TOKEN working
+# If error → Token invalid or network issue
+```
+
+---
+
+## 🎉 EXPECTED RESULT
+
+✅ Voice cloning with natural Indian English accent
+✅ Preserves your voice tone & characteristics
+✅ No more robotic American English
+✅ 20-40 second inference per sentence
+✅ Professional quality output
+
+---
+
+**Time to fix: ~5 minutes**
+**Questions? Check SETUP_GUIDE_INDIAN_ENGLISH.md for full details**
